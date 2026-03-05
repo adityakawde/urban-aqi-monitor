@@ -1,0 +1,220 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Urban Pollution & Human Health Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-wrap">
+      <div class="brand">
+        <div class="brand-icon">
+          <div class="pulse-ring r1"></div>
+          <div class="pulse-ring r2"></div>
+          <svg viewBox="0 0 32 32" fill="none" class="brand-svg">
+            <circle cx="16" cy="16" r="5" fill="currentColor"/>
+            <path d="M16 4v4M16 24v4M4 16h4M24 16h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Urban Pollution &amp; Human Health Monitor</h1>
+          <p class="brand-sub">Real-time AQI · Health Advisories · Live Pollution Mapping</p>
+        </div>
+      </div>
+      <div class="live-badge">
+        <span class="live-dot"></span>LIVE DATA
+      </div>
+    </div>
+  </header>
+
+  <!-- SEARCH / HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="search-row">
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="cityInput" type="text" placeholder="Search city (e.g. Delhi, New York, Tokyo…)" autocomplete="off"/>
+          <button id="searchBtn" class="btn-search">Search</button>
+        </div>
+        <span class="or-sep">or</span>
+        <button id="locBtn" class="btn-locate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          Check AQI Around Me
+        </button>
+      </div>
+      <p id="statusMsg" class="status-msg" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <main id="results" class="results hidden">
+    <div class="results-wrap">
+
+      <!-- ROW 1: AQI Hero + Side Info -->
+      <div class="row-top">
+
+        <!-- AQI Gauge Card -->
+        <div class="card aqi-card">
+          <div class="card-tag">AIR QUALITY INDEX</div>
+          <div class="aqi-body">
+            <div class="gauge-wrap">
+              <svg class="gauge-svg" viewBox="0 0 220 220">
+                <defs>
+                  <linearGradient id="gGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%"   stop-color="#00e676"/>
+                    <stop offset="33%"  stop-color="#ffea00"/>
+                    <stop offset="55%"  stop-color="#ff6d00"/>
+                    <stop offset="75%"  stop-color="#f44336"/>
+                    <stop offset="90%"  stop-color="#9c27b0"/>
+                    <stop offset="100%" stop-color="#7b0000"/>
+                  </linearGradient>
+                  <filter id="gGlow">
+                    <feGaussianBlur stdDeviation="4" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                </defs>
+                <!-- Background arc -->
+                <circle cx="110" cy="110" r="90" fill="none"
+                  stroke="rgba(255,255,255,0.07)" stroke-width="16"
+                  stroke-dasharray="472 102" stroke-dashoffset="118"
+                  stroke-linecap="round"/>
+                <!-- Colored fill arc -->
+                <circle id="gaugeFill" cx="110" cy="110" r="90" fill="none"
+                  stroke="url(#gGrad)" stroke-width="16"
+                  stroke-dasharray="0 574" stroke-dashoffset="118"
+                  stroke-linecap="round" filter="url(#gGlow)"
+                  style="transition:stroke-dasharray 1.5s cubic-bezier(.4,0,.2,1)"/>
+              </svg>
+              <div class="gauge-center">
+                <span id="aqiNum" class="aqi-num">—</span>
+                <span class="aqi-unit-label">US AQI</span>
+              </div>
+            </div>
+            <div class="aqi-right">
+              <div id="aqiBadge" class="aqi-badge">—</div>
+              <p id="aqiDesc" class="aqi-desc-text">Search a city or use your location to see live air quality data and health recommendations.</p>
+              <!-- Mini AQI scale -->
+              <div class="mini-scale">
+                <div class="mini-track">
+                  <div class="ms g" title="Good 0-50"></div>
+                  <div class="ms m" title="Moderate 51-100"></div>
+                  <div class="ms u" title="Unhealthy for Sensitive 101-150"></div>
+                  <div class="ms h" title="Unhealthy 151-200"></div>
+                  <div class="ms v" title="Very Unhealthy 201-300"></div>
+                  <div class="ms z" title="Hazardous 301+"></div>
+                </div>
+                <div class="mini-scale-labels">
+                  <span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span><span>500</span>
+                </div>
+                <div id="scalePointer" class="scale-pointer" style="left:0%">▲</div>
+              </div>
+              <div class="scale-legend">
+                <span class="sl g">Good</span>
+                <span class="sl m">Moderate</span>
+                <span class="sl u">USG</span>
+                <span class="sl h">Unhealthy</span>
+                <span class="sl v">Very</span>
+                <span class="sl z">Hazardous</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Location + Meta -->
+        <div class="side-col">
+          <div class="card loc-card">
+            <div class="card-tag">📍 DETECTED LOCATION</div>
+            <div id="locName" class="loc-name">—</div>
+            <div id="locCoords" class="loc-coords">—</div>
+          </div>
+          <div class="card meta-card">
+            <div class="card-tag">⏱ LAST UPDATED</div>
+            <div id="lastUpdated" class="last-updated-time">—</div>
+            <div class="meta-source">OpenWeatherMap Air Pollution API</div>
+          </div>
+          <div class="card pm-highlight-card">
+            <div class="card-tag">🔬 PM2.5 (KEY POLLUTANT)</div>
+            <div id="pm25Val" class="pm25-val">— µg/m³</div>
+            <div id="pm25Bar" class="pm25-bar"><div id="pm25Fill" class="pm25-fill" style="width:0%"></div></div>
+            <div id="pm25Status" class="pm25-status">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HEALTH ALERT BANNER -->
+      <div id="healthBanner" class="card health-banner hidden">
+        <div class="hb-left">
+          <div id="hbIcon" class="hb-icon">🌿</div>
+          <div class="hb-content">
+            <div class="hb-risk-label" id="hbRisk">LOW RISK</div>
+            <div id="hbTitle" class="hb-title">—</div>
+            <p id="hbMsg" class="hb-msg">—</p>
+          </div>
+        </div>
+        <div id="hbGroups" class="hb-groups"></div>
+      </div>
+
+      <!-- PREVENTIVE MEASURES — rich grid -->
+      <div id="prevCard" class="card prev-card hidden">
+        <div class="prev-top">
+          <div class="prev-top-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div>
+              <div class="card-tag">PREVENTIVE MEASURES</div>
+              <h2 class="prev-heading">What You Should Do Right Now</h2>
+            </div>
+          </div>
+          <div id="prevRiskBadge" class="prev-risk-badge">—</div>
+        </div>
+        <div id="prevGrid" class="prev-grid"></div>
+        <!-- Sensitive groups section -->
+        <div id="sensitiveSection" class="sensitive-section hidden">
+          <div class="sensitive-title">⚠️ Special Guidance for Sensitive Groups</div>
+          <div id="sensitiveGrid" class="sensitive-grid"></div>
+        </div>
+      </div>
+
+      <!-- POLLUTANTS BREAKDOWN -->
+      <div class="card pollutants-card">
+        <div class="card-tag">🧪 POLLUTANT BREAKDOWN</div>
+        <h3 class="section-title">Detailed Air Composition</h3>
+        <div id="pollGrid" class="poll-grid"></div>
+      </div>
+
+      <!-- CHART + MAP -->
+      <div class="bottom-row">
+        <div class="card chart-card">
+          <div class="card-tag">📈 AQI HISTORY</div>
+          <h3 class="section-title">Recent Readings Trend</h3>
+          <div class="chart-wrap"><canvas id="aqiChart"></canvas></div>
+        </div>
+        <div class="card map-card">
+          <div class="card-tag">🗺️ POLLUTION MAP</div>
+          <h3 class="section-title">Live PM2.5 Overlay</h3>
+          <div id="mapEl" class="map-el"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>AQI calculated using US EPA breakpoints from PM2.5 &amp; O₃ concentrations · Data: <a href="https://openweathermap.org/api/air-pollution" target="_blank" rel="noopener">OpenWeatherMap</a> · Built for healthier urban living</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
