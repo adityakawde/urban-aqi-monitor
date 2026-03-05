@@ -1,0 +1,54 @@
+# 🌆 Urban Pollution & Human Health Monitor
+
+Real-time AQI web app using **US EPA breakpoints** (0–500 scale), rich health advisories, and detailed preventive measures per pollution level.
+
+---
+
+## ✅ Fixes in This Version
+
+| Issue | Fix Applied |
+|---|---|
+| AQI in single digits | Now calculated using **US EPA formula** from PM2.5 & O3 concentrations — gives real 0–500 AQI |
+| No preventive measures | Full **preventive measures grid** with 4–9 actionable steps per AQI level |
+| Sensitive groups missing | Dedicated **sensitive groups** section (children, elderly, pregnant, heart/lung patients) |
+| UI not appealing | Complete redesign — dark navy + teal, Bebas Neue typography, editorial dashboard layout |
+
+---
+
+## 🚀 Run Locally
+
+1. Open folder in **VS Code**
+2. Install **Live Server** extension
+3. Right-click `index.html` → **Open with Live Server**
+4. Opens at `http://127.0.0.1:5500`
+
+> Geolocation requires localhost or HTTPS — Live Server handles this.
+
+---
+
+## ☁️ Deploy to GitHub Pages
+
+```bash
+git init && git add .
+git commit -m "Urban Pollution Monitor"
+git remote add origin https://github.com/YOUR_USER/YOUR_REPO.git
+git push -u origin main
+```
+Then: **Settings → Pages → Branch: main → Save**
+
+Live URL: `https://YOUR_USER.github.io/YOUR_REPO/`
+
+---
+
+## 🎨 AQI Scale (US EPA)
+
+| AQI | Category | Color | Key Action |
+|---|---|---|---|
+| 0–50 | Good | 🟢 Green | No restrictions |
+| 51–100 | Moderate | 🟡 Yellow | Sensitive groups reduce exertion |
+| 101–150 | Unhealthy for Sensitive | 🟠 Orange | Wear mask, limit outdoor time |
+| 151–200 | Unhealthy | 🔴 Red | Avoid outdoor activity |
+| 201–300 | Very Unhealthy | 🟣 Purple | Stay indoors, seal building |
+| 301+ | Hazardous | 🔴 Dark Red | Emergency protocol |
+
+Data: OpenWeatherMap · AQI: US EPA formula from PM2.5 & O3
